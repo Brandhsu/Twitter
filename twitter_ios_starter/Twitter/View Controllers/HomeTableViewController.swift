@@ -16,22 +16,26 @@ class HomeTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        numberOfTweets = 10
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
-        
+
         myRefreshControl.addTarget(self, action: #selector(loadTweets), for: .valueChanged)
         tableView.refreshControl = myRefreshControl
+        
     }
-
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.loadTweets() // load tweet whenever app is at homescreen
+    }
     
     @objc func loadTweets(){
         // Tweets API
-        numberOfTweets = 20
+        numberOfTweets = 10
         let myURL = "https://api.twitter.com/1.1/statuses/home_timeline.json"
         let myParams = ["count": numberOfTweets]
         
@@ -43,6 +47,7 @@ class HomeTableViewController: UITableViewController {
             }
             
             self.tableView.reloadData()
+            
             self.myRefreshControl.endRefreshing()
             
         }, failure: { (Error) in
@@ -52,7 +57,7 @@ class HomeTableViewController: UITableViewController {
     
     // for adding more content dynamically
     func loadMoreTweets(){
-        numberOfTweets = numberOfTweets + 20
+        numberOfTweets = numberOfTweets + 10
         let myURL = "https://api.twitter.com/1.1/statuses/home_timeline.json"
          let myParams = ["count": numberOfTweets]
         
@@ -94,6 +99,13 @@ class HomeTableViewController: UITableViewController {
             cell.profileImageView.image = UIImage(data: imageData)
         }
         
+        // find if a tweet is favorited
+        cell.setFavorite(tweetArray[indexPath.row]["favorited"] as! Bool)
+        cell.tweetId = tweetArray[indexPath.row]["id"] as! Int
+        
+        // find if a tweet is retweeted
+        cell.setRetweeted(tweetArray[indexPath.row]["retweeted"] as! Bool)
+        
         return cell
     }
     
@@ -118,6 +130,13 @@ class HomeTableViewController: UITableViewController {
         return tweetArray.count
     }
 
+    
+    
+    
+    
+    
+    
+    
     /*
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
